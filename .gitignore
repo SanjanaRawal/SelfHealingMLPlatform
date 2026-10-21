@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables and secrets
+.env
+
+# Data and generated artifacts
+data/raw/*
+data/processed/*
+models/*
+reports/*
+logs/*
+
+# Keep placeholder files if added later
+!.gitkeep
+
+# Testing and tooling
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and operating system
+.vscode/
+Thumbs.db

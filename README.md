@@ -15,7 +15,7 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Phase: Core ML Pipeline Implemented**
+**Current Phase: Core ML Pipeline and Reusable Inference Implemented**
 
 The project currently includes data ingestion, data validation, baseline model training, multi-model comparison, hyperparameter tuning, and test-set evaluation.
 
@@ -102,6 +102,23 @@ Evaluate the baseline and tuned Logistic Regression models using:
 
 **Output:** `reports/final_test_results.json`
 
+
+### 6. Reusable Prediction Module
+
+**File:** `src/self_healing_ml/models/predict.py`
+
+- Load the tuned Logistic Regression pipeline.
+- Accept customer details as a Python dictionary.
+- Check for missing required features.
+- Convert numeric inputs into numeric values.
+- Return a predicted churn label (`Yes` or `No`).
+- Return the predicted churn probability.
+
+The module provides a reusable inference function through
+`predict_churn(customer_data)`.
+
+
+
 ## 📊 Initial Model Results
 
 The following results were obtained using the current stratified 80/20 train-test split.
@@ -122,6 +139,24 @@ The following results were obtained using the current stratified 80/20 train-tes
 - Model selection involves trade-offs between identifying churn-risk customers and limiting false-positive predictions.
 
 > **Note:** These are development-stage results. Because the same test split has been examined during development, a fresh holdout or external dataset is needed for a more rigorous final performance assessment.
+
+
+## 🧪 Automated Testing
+
+The project uses `pytest` to verify data validation and prediction behavior.
+
+**Test files:**
+- `tests/test_validation.py` — tests for dataset validation rules.
+- `tests/test_predictions.py` — tests for the reusable prediction module.
+
+Run the complete test suite from the project root:
+
+```powershell
+python -m pytest -v
+```
+
+**Latest test result:** 13 tests passed.
+
 
 ## 🧰 Technology Stack
 
@@ -208,6 +243,8 @@ SelfHealingMLPlatform/
 ├── reports/
 ├── logs/
 ├── tests/
+│   ├── test_validation.py
+│   └── test_predictions.py
 │
 ├── src/
 │   └── self_healing_ml/
@@ -220,6 +257,7 @@ SelfHealingMLPlatform/
 │       │   ├── compare_models.py
 │       │   ├── tune_models.py
 │       │   └── evaluate_models.py
+│       │   └── predict.py
 │       │
 │       ├── monitoring/
 │       ├── orchestration/
@@ -302,7 +340,7 @@ These commands assume the modules support `python -m` execution and that the dat
 - [x] Multi-model comparison using cross-validation
 - [x] Hyperparameter tuning
 - [x] Baseline versus tuned-model evaluation
-- [ ] Reusable prediction and inference module
+- [x] Reusable prediction and inference module
 - [ ] Prediction logging and monitoring
 - [ ] Data drift detection
 - [ ] Model performance monitoring

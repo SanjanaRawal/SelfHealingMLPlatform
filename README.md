@@ -15,7 +15,7 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Phase: Core ML Pipeline and Reusable Inference Implemented**
+**Current Status:** Core ML Pipeline, Reusable Inference, and Data Drift Monitoring Implemented
 
 The project currently includes data ingestion, data validation, baseline model training, multi-model comparison, hyperparameter tuning, and test-set evaluation.
 
@@ -118,6 +118,27 @@ The module provides a reusable inference function through
 `predict_churn(customer_data)`.
 
 
+### 7. Data Drift Detection
+
+Implemented a statistical data drift detection module to monitor changes in incoming customer data compared with a reference dataset.
+
+**Key capabilities:**
+- Detects numeric feature drift using the Kolmogorov-Smirnov (KS) test.
+- Detects categorical feature drift using the Chi-square test.
+- Applies Bonferroni correction to adjust the significance threshold for multiple feature tests.
+- Reports reference and current non-missing observation counts.
+- Identifies features with statistically significant distribution changes.
+- Handles invalid inputs and insufficient data cases.
+- Exports drift monitoring results to a CSV report.
+
+**Monitoring module:** `src/self_healing_ml/monitoring/drift_detection.py`
+
+**Execution module:** `src/self_healing_ml/monitoring/monitor_data.py`
+
+**Drift report:** `reports/data_drift_report.csv`
+
+**Validation:** Tested using identical datasets and simulated distribution changes. The monitoring run detected the intentionally introduced drift in `MonthlyCharges`.
+
 
 ## 📊 Initial Model Results
 
@@ -143,11 +164,17 @@ The following results were obtained using the current stratified 80/20 train-tes
 
 ## 🧪 Automated Testing
 
-The project uses `pytest` to verify data validation and prediction behavior.
+The project uses `pytest` to verify data validation, prediction behavior and data drift detection.
 
 **Test files:**
 - `tests/test_validation.py` — tests for dataset validation rules.
 - `tests/test_predictions.py` — tests for the reusable prediction module.
+- `tests/test_drift_detection.py` — tests for numeric and categorical drift detection, input validation, and drift report generation.
+
+**Test coverage:**
+- Data validation: 7 tests
+- Prediction module: 6 tests
+- Data drift detection: 7 tests
 
 Run the complete test suite from the project root:
 
@@ -155,7 +182,7 @@ Run the complete test suite from the project root:
 python -m pytest -v
 ```
 
-**Latest test result:** 13 tests passed.
+**Latest test result:** 20 tests passed.
 
 
 ## 🧰 Technology Stack
@@ -245,6 +272,7 @@ SelfHealingMLPlatform/
 ├── tests/
 │   ├── test_validation.py
 │   └── test_predictions.py
+│   └── test_drift_detection.py
 │
 ├── src/
 │   └── self_healing_ml/
@@ -259,7 +287,9 @@ SelfHealingMLPlatform/
 │       │   └── evaluate_models.py
 │       │   └── predict.py
 │       │
-│       ├── monitoring/
+│       ├── models/
+│       │   ├── drift_detection.py
+│       │   ├── monitor_data.py
 │       ├── orchestration/
 │       └── api/
 │
@@ -329,6 +359,21 @@ python -m src.self_healing_ml.models.tune_models
 python -m src.self_healing_ml.models.evaluate_models
 ```
 
+
+### 7. Run Data Drift Monitoring
+
+1. Ensure the reference dataset exists at `data/raw/Telco-Customer-Churn.csv`.
+2. Ensure the current dataset exists at `data/processed/current_data.csv`.
+3. Run the monitoring module from the project root:
+
+```bash
+python -m src.self_healing_ml.monitoring.monitor_data
+```
+
+4. Review the drift report generated at `reports/data_drift_report.csv`.
+
+**Note:** The current dataset used during initial testing was simulated by modifying `MonthlyCharges`. This demonstrates drift detection on controlled data; it is not evidence of drift in real production data.
+
 These commands assume the modules support `python -m` execution and that the dataset, dependencies, and required artifacts are available.
 
 ## 🗺️ Development Roadmap
@@ -342,7 +387,7 @@ These commands assume the modules support `python -m` execution and that the dat
 - [x] Baseline versus tuned-model evaluation
 - [x] Reusable prediction and inference module
 - [ ] Prediction logging and monitoring
-- [ ] Data drift detection
+- [x] Data drift detection
 - [ ] Model performance monitoring
 - [ ] Automated retraining triggers
 - [ ] Champion–challenger model evaluation

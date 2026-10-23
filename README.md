@@ -15,11 +15,11 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, and Data Drift Monitoring Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection and Performance Monitoring Implemented
 
-The project currently includes data ingestion, data validation, baseline model training, multi-model comparison, hyperparameter tuning, and test-set evaluation.
+The project currently includes data ingestion, data validation, baseline model training, multi-model comparison, hyperparameter tuning, test-set evaluation, reusable inference, data drift detection, and offline model performance monitoring.
 
-Advanced monitoring, automated retraining, champion–challenger evaluation, safe model promotion, rollback, API serving, and dashboard functionality are planned for future development.
+Automated retraining, champion–challenger evaluation, safe model promotion, rollback, API serving, and dashboard functionality are planned for future development.
 
 ## 🎯 Objectives
 
@@ -140,6 +140,29 @@ Implemented a statistical data drift detection module to monitor changes in inco
 **Validation:** Tested using identical datasets and simulated distribution changes. The monitoring run detected the intentionally introduced drift in `MonthlyCharges`.
 
 
+### 8. Model Performance Monitoring
+
+Implemented a model performance monitoring module to evaluate predictions and identify potential model degradation.
+
+**Key capabilities:**
+- Calculates accuracy, precision, recall, F1-score, and ROC-AUC.
+- Compares the current F1-score against a reference baseline.
+- Supports configurable minimum F1-score and maximum F1-drop thresholds.
+- Generates alerts when configured performance thresholds are violated.
+- Exports performance metrics and monitoring status to a CSV report.
+- Includes automated tests for metric calculations, input validation, degradation detection, and report generation.
+
+**Monitoring module:** `src/self_healing_ml/monitoring/performance_monitor.py`
+
+**Execution module:** `src/self_healing_ml/monitoring/monitor_model_performance.py`
+
+**Performance report:** `reports/model_performance_report.csv`
+
+**Validation:** The monitoring runner was executed successfully on a fixed test split, producing performance metrics and reporting no degradation against the configured reference baseline.
+
+**Note:** This is an offline demonstration using previously evaluated data. Production monitoring requires new labelled evaluation data and a versioned performance baseline.
+
+
 ## 📊 Initial Model Results
 
 The following results were obtained using the current stratified 80/20 train-test split.
@@ -170,11 +193,13 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - `tests/test_validation.py` — tests for dataset validation rules.
 - `tests/test_predictions.py` — tests for the reusable prediction module.
 - `tests/test_drift_detection.py` — tests for numeric and categorical drift detection, input validation, and drift report generation.
+- `tests/test_performance_monitor.py` — tests for performance metrics, input validation, degradation detection, and report generation.
 
 **Test coverage:**
 - Data validation: 7 tests
 - Prediction module: 6 tests
 - Data drift detection: 7 tests
+- Performance monitoring: 12 tests
 
 Run the complete test suite from the project root:
 
@@ -182,7 +207,7 @@ Run the complete test suite from the project root:
 python -m pytest -v
 ```
 
-**Latest test result:** 20 tests passed.
+**Latest test result:** 32 tests passed.
 
 
 ## 🧰 Technology Stack
@@ -376,6 +401,22 @@ python -m src.self_healing_ml.monitoring.monitor_data
 
 These commands assume the modules support `python -m` execution and that the dataset, dependencies, and required artifacts are available.
 
+
+### 8. Run Model Performance Monitoring
+
+1. Ensure the trained model exists at `models/tuned_logistic_regression.joblib`.
+2. Ensure the dataset exists at `data/raw/Telco-Customer-Churn.csv`.
+3. Run the monitoring module from the project root:
+
+```powershell
+python -m src.self_healing_ml.monitoring.monitor_model_performance
+```
+
+4. Review the generated report at `reports/model_performance_report.csv`.
+
+**Note:** The current runner uses a fixed, previously evaluated test split for demonstration. It does not yet monitor live production predictions.
+
+
 ## 🗺️ Development Roadmap
 
 - [x] Project scaffold and version control
@@ -388,7 +429,7 @@ These commands assume the modules support `python -m` execution and that the dat
 - [x] Reusable prediction and inference module
 - [ ] Prediction logging and monitoring
 - [x] Data drift detection
-- [ ] Model performance monitoring
+- [x] Model performance monitoring
 - [ ] Automated retraining triggers
 - [ ] Champion–challenger model evaluation
 - [ ] Model registry and controlled promotion

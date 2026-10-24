@@ -1,6 +1,7 @@
 from pathlib import Path
 import joblib
 import pandas as pd
+from src.self_healing_ml.monitoring.prediction_logger import log_prediction
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -74,10 +75,18 @@ def predict_churn(customer_data: dict) -> dict:
     prediction = int(model.predict(customer_df)[0])
     churn_probability = float(model.predict_proba(customer_df)[0, 1])
 
-    return {
+    result = {
         "prediction": "Yes" if prediction == 1 else "No",
         "churn_probability": round(churn_probability, 4),
     }
+    
+    log_prediction(
+        prediction=result["prediction"],
+        churn_probability=result["churn_probability"],
+        model_version="tuned_logistic_regression",
+    )
+    
+    return result
 
 
 if __name__ == "__main__":

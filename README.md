@@ -15,11 +15,11 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, and Automated Retraining Trigger Logic Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic and Champion Challenger Evaluation Implemented
 
-The project currently includes data ingestion, data validation, baseline model training, multi-model comparison, hyperparameter tuning, test-set evaluation, reusable inference, data drift detection, and offline model performance monitoring.
+The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, and offline champion–challenger model evaluation.
 
-Champion–challenger evaluation, safe model promotion, rollback, API serving, and dashboard functionality are planned for future development.
+Safe model promotion, rollback, API serving, and dashboard functionality remain planned for future development.
 
 ## 🎯 Objectives
 
@@ -208,6 +208,39 @@ python -m src.self_healing_ml.orchestration.retraining_trigger
 **Safety:** The module recommends retraining but does not automatically replace or promote the existing model.
 
 **Current limitation:** Decisions use offline monitoring reports. Live production monitoring and automated model retraining are not yet implemented.
+
+### 11. Champion–Challenger Model Evaluation
+
+Implemented an offline evaluation module that compares a candidate model against the current champion using the same stratified test split.
+
+**Key capabilities:**
+
+- Loads the current champion and challenger model artifacts.
+- Evaluates accuracy, precision, recall, F1-score, and ROC-AUC.
+- Calculates metric differences between the two models.
+- Applies configurable acceptance criteria for F1-score improvement, recall drop, and ROC-AUC drop.
+- Produces an explicit `accept_challenger` or `reject_challenger` decision.
+- Saves the evaluation results and decision to a JSON report.
+- Prevents automatic model promotion.
+
+**Evaluation module:** `src/self_healing_ml/orchestration/champion_challenger.py`
+
+**Champion model:** `models/tuned_logistic_regression.joblib`
+
+**Challenger model:** `models/tuned_gradient_boosting.joblib`
+
+**Decision report:** `reports/champion_challenger_report.json`
+
+**Execution command:**
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m src.self_healing_ml.orchestration.champion_challenger
+```
+
+**Current demonstration result:** The challenger was rejected because it failed the minimum F1-score improvement and maximum recall-drop criteria. Its ROC-AUC was higher than the champion's.
+
+**Important limitation:** This is an offline demonstration using a fixed test split that has already been examined during development. The decision is not evidence of production readiness, and no model was promoted or replaced.
 
 
 ## 📊 Initial Model Results
@@ -519,7 +552,7 @@ The module recommends retraining when a configured trigger condition is met. It 
 - [x] Data drift detection
 - [x] Model performance monitoring
 - [x] Automated retraining triggers
-- [ ] Champion–challenger model evaluation
+- [x] Champion–challenger model evaluation
 - [ ] Model registry and controlled promotion
 - [ ] Model rollback mechanism
 - [ ] FastAPI prediction service

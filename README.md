@@ -15,9 +15,9 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic and Champion Challenger Evaluation Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation and Model Registtry Foundation Implemented
 
-The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, and offline champion–challenger model evaluation.
+The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation and JSON-based model registry persistence with structural validation.
 
 Safe model promotion, rollback, API serving, and dashboard functionality remain planned for future development.
 
@@ -243,6 +243,30 @@ python -m src.self_healing_ml.orchestration.champion_challenger
 **Important limitation:** This is an offline demonstration using a fixed test split that has already been examined during development. The decision is not evidence of production readiness, and no model was promoted or replaced.
 
 
+### 12. Model Registry Foundation
+
+Implemented a JSON-based model registry to maintain model metadata and track the designated champion model.
+
+**Key capabilities:**
+- Load an existing registry or initialize an empty registry.
+- Persist registry data in JSON format.
+- Create parent directories when saving registry data.
+- Validate registry structure and required fields.
+- Reject invalid model and history collections.
+- Verify registry operations through automated tests.
+
+**Registry module:** `src/self_healing_ml/orchestration/model_registry.py`
+
+**Registry file:** `models/registry.json` (created when the registry is saved).
+
+**Registry structure:**
+- `active_champion` — identifies the designated champion model.
+- `models` — stores registered model metadata.
+- `history` — reserved for recording model management events.
+
+**Current limitation:** The registry foundation is implemented, but controlled model promotion, history updates, and rollback are not yet implemented.
+
+
 ## 📊 Initial Model Results
 
 The following results were obtained using the current stratified 80/20 train-test split.
@@ -275,8 +299,8 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - `tests/test_drift_detection.py` — tests for numeric and categorical drift detection, input validation, and drift report generation.
 - `tests/test_performance_monitor.py` — tests for performance metrics, input validation, degradation detection, and report generation.
 - `tests/test_prediction_logger.py` — tests for prediction logging, input validation, and CSV record appending.
-
 - `tests/test_retraining_trigger.py` — tests for retraining decisions, drift and performance triggers, threshold checks, report generation, and invalid inputs.
+- `tests/test_model_registry.py` — tests for registry initialization, JSON persistence, directory creation, structural validation, and invalid registry data.
 
 **Test coverage:**
 - Data validation: 7 tests
@@ -285,6 +309,7 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - Performance monitoring: 12 tests
 - Prediction logger: 15 tests
 - Automated retraining triggers: 9 tests
+- Model Registry : 9 tests 
 
 Run the complete test suite from the project root:
 
@@ -292,7 +317,7 @@ Run the complete test suite from the project root:
 python -m pytest -v
 ```
 
-**Latest test result:** 56 tests passed.
+**Latest test result:** 65 tests passed.
 
 
 ## 🧰 Technology Stack
@@ -386,6 +411,7 @@ SelfHealingMLPlatform/
 │   ├── test_performance_monitor.py
 │   ├── test_prediction_logger.py
 │   └── test_retraining_trigger.py
+│   └── test_model_registry.py
 │
 ├── src/
 │   └── self_healing_ml/
@@ -408,6 +434,8 @@ SelfHealingMLPlatform/
 │       │   └── prediction_logger.py
 │       ├── orchestration/
 │       │   └── retraining_trigger.py
+│       │   └── champion_challenger.py
+│       │   └── model_registry.py
 │       └── api/
 │
 ├── requirements.txt
@@ -536,6 +564,21 @@ python -m src.self_healing_ml.orchestration.retraining_trigger
 4. Review the generated decision at `reports/retraining_decision.json`.
 
 The module recommends retraining when a configured trigger condition is met. It does not automatically train, promote, or replace a model.
+
+
+### 11. Run Champion–Challenger Evaluation
+
+1. Ensure the champion and challenger model artifacts exist in the `models/` directory.
+2. Run the evaluation module from the project root:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m src.self_healing_ml.orchestration.champion_challenger
+```
+
+3. Review the evaluation decision at `reports/champion_challenger_report.json`.
+
+The module compares the champion and challenger using configured evaluation criteria and recommends whether the challenger should be accepted or rejected. It does not automatically promote or replace the active model.
 
 
 ## 🗺️ Development Roadmap

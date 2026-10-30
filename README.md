@@ -15,11 +15,11 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation and Safe Model Promotion Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation, Safe Model Promotion and Model Rollback Implemented
 
 The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation, JSON-based model registry persistence with structural validation and controlled registry-level model promotion.
 
-Model rollback, API serving, and dashboard functionality remain planned for future development.
+API serving, and dashboard functionality remain planned for future development.
 
 ## 🎯 Objectives
 
@@ -285,6 +285,29 @@ Implemented a controlled model promotion component that uses the champion–chal
 **Important limitation:** Promotion is controlled through the offline registry. It does not automatically switch a live prediction service to a new model. The current challenger has been rejected, so no promotion has taken place. Model rollback remains planned.
 
 
+### 14. Model Rollback Mechanism
+
+Implemented a controlled model rollback component that restores the previous champion using the model registry's promotion history.
+
+**Key capabilities:**
+- Identify the currently active champion.
+- Retrieve the previous champion from the latest promotion event.
+- Validate registry history before performing rollback.
+- Verify previous model registration and artifact availability.
+- Restore the previous champion and update model statuses.
+- Record rollback events with UTC timestamps in registry history.
+- Prevent repeated rollback of the same promotion.
+- Preserve registry state when rollback validation fails.
+
+**Rollback module:** `src/self_healing_ml/orchestration/model_rollback.py`
+
+**Registry file:** `models/registry.json`
+
+**Testing:** 11 automated tests covering successful rollback, validation failures, missing artifacts, registry updates, and repeated rollback.
+
+**Important limitation:** Rollback currently updates the offline model registry. It does not automatically switch a live prediction service to the restored model.
+
+
 ## 📊 Initial Model Results
 
 The following results were obtained using the current stratified 80/20 train-test split.
@@ -320,6 +343,7 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - `tests/test_retraining_trigger.py` — tests for retraining decisions, drift and performance triggers, threshold checks, report generation, and invalid inputs.
 - `tests/test_model_registry.py` — tests for registry initialization, JSON persistence, directory creation, structural validation, and invalid registry data.
 - `tests/test_model_promotion.py` — tests for rejected promotions, accepted challenger promotion, registry updates, missing model artifacts, invalid report structures, and invalid decisions.
+- `tests/test_model_rollback.py` — tests for successful rollback, registry status updates, history recording, invalid rollback conditions, missing artifacts, and repeated rollback.
 
 **Test coverage:**
 - Data validation: 7 tests
@@ -330,6 +354,7 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - Automated retraining triggers: 9 tests
 - Model Registry : 9 tests 
 - Model promotion: 6 tests
+- Model rollback : 11 tests
 
 Run the complete test suite from the project root:
 
@@ -337,7 +362,7 @@ Run the complete test suite from the project root:
 python -m pytest -v
 ```
 
-**Latest test result:** 71 tests passed.
+**Latest test result:** 82 tests passed.
 
 
 ## 🧰 Technology Stack
@@ -430,9 +455,10 @@ SelfHealingMLPlatform/
 │   ├── test_drift_detection.py
 │   ├── test_performance_monitor.py
 │   ├── test_prediction_logger.py
-│   └── test_retraining_trigger.py
-│   └── test_model_registry.py
-│   └── test_model_promotion.py
+│   ├── test_retraining_trigger.py
+│   ├── test_model_registry.py
+│   ├── test_model_promotion.py
+│   └── test_model_rollback.py
 │
 ├── src/
 │   └── self_healing_ml/
@@ -454,10 +480,11 @@ SelfHealingMLPlatform/
 │       │   ├── monitor_model_performance.py
 │       │   └── prediction_logger.py
 │       ├── orchestration/
-│       │   └── retraining_trigger.py
-│       │   └── champion_challenger.py
-│       │   └── model_registry.py
-│       │   └── model_promotion.py
+│       │   ├── retraining_trigger.py
+│       │   ├── champion_challenger.py
+│       │   ├── model_registry.py
+│       │   ├── model_promotion.py
+|       │   └── model_rollback.py
 │       └── api/
 │
 ├── requirements.txt
@@ -621,6 +648,20 @@ python -m src.self_healing_ml.orchestration.model_promotion
 The module promotes only a challenger accepted by the evaluation report. If the challenger is rejected, promotion is skipped and the registry remains unchanged.
 
 
+### 13. Run Model Rollback
+
+Run the rollback module from the project root:
+
+```powershell
+$env:PYTHONPATH = "$PWD\src"
+python -m src.self_healing_ml.orchestration.model_rollback
+```
+
+The module checks the model registry and restores the previous champion only when a valid promotion event and the required model artifact are available.
+
+If no registry exists or rollback conditions are not satisfied, the operation is safely rejected.
+
+
 ## 🗺️ Development Roadmap
 
 - [x] Project scaffold and version control
@@ -637,7 +678,7 @@ The module promotes only a challenger accepted by the evaluation report. If the 
 - [x] Automated retraining triggers
 - [x] Champion–challenger model evaluation
 - [x] Model registry and controlled promotion
-- [ ] Model rollback mechanism
+- [x] Model rollback mechanism
 - [ ] FastAPI prediction service
 - [ ] Streamlit monitoring dashboard
 - [ ] CI/CD pipeline and automated tests

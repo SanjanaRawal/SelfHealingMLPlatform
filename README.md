@@ -15,11 +15,11 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation, Safe Model Promotion and Model Rollback Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation, Safe Model Promotion, Model Rollback and FastAPI Prediction Service Implemented
 
-The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation, JSON-based model registry persistence with structural validation and controlled registry-level model promotion.
+The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation, JSON-based model registry persistence controlled model promotion and rollback, and REST API-based customer churn prediction.
 
-API serving, and dashboard functionality remain planned for future development.
+Monitoring dashboard, CI/CD automation and deployment functionality remain planned for future development.
 
 ## 🎯 Objectives
 
@@ -260,7 +260,7 @@ Implemented a JSON-based model registry to maintain model metadata and track the
 - `models` — stores registered model metadata.
 - `history` — reserved for recording model management events.
 
-**Current limitation:** The registry foundation is implemented, but history updates, and rollback are not yet implemented.
+**Current status:** Registry history updates, controlled model promotion, and rollback are implemented. Registry operations are currently performed offline.
 
 
 ### 13. Safe Model Promotion
@@ -282,7 +282,7 @@ Implemented a controlled model promotion component that uses the champion–chal
 
 **Registry file:** `models/registry.json` (created when a successful promotion saves the registry).
 
-**Important limitation:** Promotion is controlled through the offline registry. It does not automatically switch a live prediction service to a new model. The current challenger has been rejected, so no promotion has taken place. Model rollback remains planned.
+**Important limitation:** Promotion is controlled through the offline model registry. It does not automatically switch a live prediction service to a newly promoted model. The current challenger has been rejected, so no successful promotion has taken place. Model rollback is implemented as a separate controlled operation.
 
 
 ### 14. Model Rollback Mechanism
@@ -306,6 +306,51 @@ Implemented a controlled model rollback component that restores the previous cha
 **Testing:** 11 automated tests covering successful rollback, validation failures, missing artifacts, registry updates, and repeated rollback.
 
 **Important limitation:** Rollback currently updates the offline model registry. It does not automatically switch a live prediction service to the restored model.
+
+
+### 15. FastAPI Prediction Service
+
+Implemented a REST API using FastAPI to expose the existing customer churn prediction pipeline through HTTP endpoints.
+
+**Key capabilities:**
+
+- Provides a root endpoint with API information.
+- Provides a health-check endpoint to check model artifact availability.
+- Exposes model information, including model name, model file, and feature details.
+- Accepts customer information through a structured JSON request.
+- Validates incoming data using Pydantic schemas.
+- Rejects missing features, unexpected fields, and invalid feature values.
+- Uses the existing reusable `predict_churn()` inference function.
+- Returns the predicted churn label (`Yes` or `No`) and churn probability.
+- Handles prediction errors and unavailable model artifacts.
+- Automatically records successful predictions in the existing CSV prediction log.
+- Provides interactive API documentation through Swagger UI.
+- Includes automated endpoint and input-validation tests.
+
+**API module:** `src/self_healing_ml/api/main.py`
+
+**Request and response schemas:** `src/self_healing_ml/api/schemas.py`
+
+**Inference integration:** `src/self_healing_ml/models/predict.py`
+
+**Prediction log:** `logs/prediction_logs.csv`
+
+**API endpoints:**
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/` | API welcome message |
+| GET | `/health` | Model artifact availability |
+| GET | `/model/info` | Model metadata and feature information |
+| POST | `/predict` | Customer churn prediction |
+
+**API documentation:** Available through Swagger UI at `http://127.0.0.1:8000/docs` when the API server is running.
+
+**Execution command:**
+
+```powershell
+python -m uvicorn src.self_healing_ml.api.main:app --reload
+```
 
 
 ## 📊 Initial Model Results
@@ -344,6 +389,7 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - `tests/test_model_registry.py` — tests for registry initialization, JSON persistence, directory creation, structural validation, and invalid registry data.
 - `tests/test_model_promotion.py` — tests for rejected promotions, accepted challenger promotion, registry updates, missing model artifacts, invalid report structures, and invalid decisions.
 - `tests/test_model_rollback.py` — tests for successful rollback, registry status updates, history recording, invalid rollback conditions, missing artifacts, and repeated rollback.
+- `tests/test_api.py` — tests for API endpoints, prediction responses, request validation, and error handling.
 
 **Test coverage:**
 - Data validation: 7 tests
@@ -355,6 +401,7 @@ The project uses `pytest` to verify data validation, prediction behavior and dat
 - Model Registry : 9 tests 
 - Model promotion: 6 tests
 - Model rollback : 11 tests
+- FastAPI endpoints: 11 tests
 
 Run the complete test suite from the project root:
 
@@ -362,7 +409,7 @@ Run the complete test suite from the project root:
 python -m pytest -v
 ```
 
-**Latest test result:** 82 tests passed.
+**Latest test result:** 93 tests passed.
 
 
 ## 🧰 Technology Stack
@@ -378,6 +425,10 @@ python -m pytest -v
 | joblib | Model serialization |
 | pytest | Automated testing |
 | Git and GitHub | Version control and collaboration |
+| FastAPI | REST API development and model serving |
+| Uvicorn | ASGI server for running the API |
+| Pydantic | API request and response validation |
+| HTTPX | API testing through FastAPI TestClient |
 
 ### Planned Integrations
 
@@ -385,7 +436,6 @@ python -m pytest -v
 |---|---|
 | MLflow | Experiment tracking and model management |
 | Evidently | Data and model monitoring |
-| FastAPI | Model serving and prediction endpoints |
 | Streamlit | Monitoring dashboard |
 | GitHub Actions | Continuous integration and delivery |
 | Docker | Containerization and reproducible deployment |
@@ -432,10 +482,13 @@ SelfHealingMLPlatform
   Safe Model Promotion / Rollback
         |
         v
-  API and Monitoring Dashboard
+  FastAPI Prediction Service
+        |
+        v
+  Monitoring Dashboard
 ```
 
-*The initial stages are implemented. The later stages represent the planned architecture.*
+*The core ML pipeline, monitoring, orchestration, model management, and FastAPI prediction service are implemented. The monitoring dashboard and production deployment remain planned.*
 
 ## 📂 Project Structure
 
@@ -458,7 +511,8 @@ SelfHealingMLPlatform/
 │   ├── test_retraining_trigger.py
 │   ├── test_model_registry.py
 │   ├── test_model_promotion.py
-│   └── test_model_rollback.py
+│   ├── test_model_rollback.py
+│   └── test_api.py
 │
 ├── src/
 │   └── self_healing_ml/
@@ -484,15 +538,17 @@ SelfHealingMLPlatform/
 │       │   ├── champion_challenger.py
 │       │   ├── model_registry.py
 │       │   ├── model_promotion.py
-|       │   └── model_rollback.py
+│       │   └── model_rollback.py
 │       └── api/
+│       │   ├── __init.py__.py
+│       │   ├── main.py
+│       │   └── schemas.py
 │
 ├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
 
-*The API directories are reserved for planned components.*
 
 ## 🚀 Getting Started
 
@@ -662,6 +718,48 @@ The module checks the model registry and restores the previous champion only whe
 If no registry exists or rollback conditions are not satisfied, the operation is safely rejected.
 
 
+
+### 14. Run FastAPI Prediction Service
+
+The FastAPI service exposes the existing customer churn prediction pipeline through REST API endpoints.
+
+1. Ensure the trained Logistic Regression model exists at `models/tuned_logistic_regression.joblib`.
+
+2. Ensure all project dependencies are installed:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+3. Start the FastAPI server from the project root:
+
+```powershell
+python -m uvicorn src.self_healing_ml.api.main:app --reload
+```
+
+4. Once the server starts successfully, open the interactive Swagger UI documentation in your browser:
+
+`http://127.0.0.1:8000/docs`
+
+5. Explore the available API endpoints:
+
+   - `GET /` — Returns the API welcome message and version.
+   - `GET /health` — Checks model artifact availability.
+   - `GET /model/info` — Returns model information and feature details.
+   - `POST /predict` — Accepts customer information and returns a churn prediction with its probability.
+
+6. To generate a prediction, expand the `POST /predict` endpoint, click **Try it out**, provide customer details in the required JSON request format, and click **Execute**.
+
+7. Review the prediction response containing:
+
+   - Predicted churn label (`Yes` or `No`).
+   - Churn probability.
+
+8. Review the prediction history at `logs/prediction_logs.csv`. Each successful prediction is automatically appended to the CSV file with its UTC timestamp, predicted label, churn probability, and model version.
+
+**Note:** The API uses the existing reusable `predict_churn()` inference function. Keep the Uvicorn server running while interacting with the API. Press `CTRL + C` in the terminal to stop the server.
+
+
 ## 🗺️ Development Roadmap
 
 - [x] Project scaffold and version control
@@ -679,7 +777,7 @@ If no registry exists or rollback conditions are not satisfied, the operation is
 - [x] Champion–challenger model evaluation
 - [x] Model registry and controlled promotion
 - [x] Model rollback mechanism
-- [ ] FastAPI prediction service
+- [x] FastAPI prediction service
 - [ ] Streamlit monitoring dashboard
 - [ ] CI/CD pipeline and automated tests
 - [ ] Docker-based deployment

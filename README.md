@@ -15,11 +15,11 @@ The Self-Healing Machine Learning Platform aims to improve the reliability of ma
 
 ## 📌 Project Status
 
-**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation, Safe Model Promotion, Model Rollback and FastAPI Prediction Service Implemented
+**Current Status:** Core ML Pipeline, Reusable Inference, Data Drift Detection, Performance Monitoring, Prediction Logging, Automated Retraining Trigger Logic, Champion Challenger Evaluation, Model Registry Foundation, Safe Model Promotion, Model Rollback , FastAPI Prediction Service and Streamlit Monitoring Dashboard Implemented.
 
-The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation, JSON-based model registry persistence controlled model promotion and rollback, and REST API-based customer churn prediction.
+The platform currently supports data validation, model training and evaluation, statistical drift detection, offline performance monitoring, prediction logging, retraining recommendations, offline champion–challenger model evaluation, JSON-based model registry persistence, controlled model promotion and rollback, REST API-based customer churn prediction, and an interactive Streamlit monitoring dashboard.
 
-Monitoring dashboard, CI/CD automation and deployment functionality remain planned for future development.
+CI/CD automation and production deployment remain planned for future development.
 
 ## 🎯 Objectives
 
@@ -353,6 +353,44 @@ python -m uvicorn src.self_healing_ml.api.main:app --reload
 ```
 
 
+### 16. Streamlit Monitoring Dashboard
+
+Implemented an interactive monitoring dashboard using Streamlit to visualize the platform's model performance, data drift, prediction history, and model management decisions.
+
+**Key capabilities:**
+
+- Provides an overview of model and monitoring status.
+- Displays model evaluation metrics, including accuracy, precision, recall, F1-score, and ROC-AUC.
+- Visualizes data drift detection results.
+- Displays prediction history and churn probabilities from the prediction logs.
+- Presents automated retraining recommendations and their reasons.
+- Displays model registry information and handles empty registry states.
+- Visualizes champion–challenger evaluation results and model acceptance or rejection decisions.
+- Organizes monitoring information into seven dedicated dashboard sections.
+
+**Dashboard module:** `src/self_healing_ml/dashboard/app.py`
+
+**Dashboard sections:**
+
+1. Overview
+2. Model Performance
+3. Data Drift
+4. Prediction Logs
+5. Retraining Decisions
+6. Model Registry
+7. Champion–Challenger
+
+**Execution command:**
+
+```powershell
+python -m streamlit run src/self_healing_ml/dashboard/app.py
+```
+
+**Access:** The dashboard opens locally in a web browser through Streamlit.
+
+**Note:** The dashboard visualizes existing monitoring reports, model registry information, and prediction logs. It does not represent a continuously running production monitoring or deployment system.
+
+
 ## 📊 Initial Model Results
 
 The following results were obtained using the current stratified 80/20 train-test split.
@@ -429,6 +467,7 @@ python -m pytest -v
 | Uvicorn | ASGI server for running the API |
 | Pydantic | API request and response validation |
 | HTTPX | API testing through FastAPI TestClient |
+| Streamlit | Interactive ML monitoring dashboard |
 
 ### Planned Integrations
 
@@ -436,7 +475,6 @@ python -m pytest -v
 |---|---|
 | MLflow | Experiment tracking and model management |
 | Evidently | Data and model monitoring |
-| Streamlit | Monitoring dashboard |
 | GitHub Actions | Continuous integration and delivery |
 | Docker | Containerization and reproducible deployment |
 
@@ -488,7 +526,7 @@ SelfHealingMLPlatform
   Monitoring Dashboard
 ```
 
-*The core ML pipeline, monitoring, orchestration, model management, and FastAPI prediction service are implemented. The monitoring dashboard and production deployment remain planned.*
+**The core ML pipeline, monitoring, orchestration, model management, FastAPI prediction service, and Streamlit monitoring dashboard are implemented. CI/CD automation and production deployment remain planned.**
 
 ## 📂 Project Structure
 
@@ -543,6 +581,9 @@ SelfHealingMLPlatform/
 │       │   ├── __init.py__.py
 │       │   ├── main.py
 │       │   └── schemas.py
+│       └── dashboard/
+│       │   ├── __init.py__.py
+│       │   └── app.py
 │
 ├── requirements.txt
 ├── .gitignore
@@ -760,6 +801,29 @@ python -m uvicorn src.self_healing_ml.api.main:app --reload
 **Note:** The API uses the existing reusable `predict_churn()` inference function. Keep the Uvicorn server running while interacting with the API. Press `CTRL + C` in the terminal to stop the server.
 
 
+### 15. Run Streamlit Monitoring Dashboard
+
+The Streamlit dashboard provides a visual interface for monitoring model performance, data drift, prediction logs, retraining decisions, and model management.
+
+1. Ensure all project dependencies are installed:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+2. Run the dashboard from the project root:
+
+```powershell
+python -m streamlit run src/self_healing_ml/dashboard/app.py
+```
+
+3. Streamlit will open the dashboard in your default browser.
+
+4. Explore the seven monitoring sections to review model metrics, drift reports, prediction history, retraining recommendations, registry information, and champion–challenger evaluation results.
+
+**Note:** The dashboard reads existing project reports, registry data, and prediction logs. Ensure the corresponding files are available for the relevant monitoring information to be displayed.
+
+
 ## 🗺️ Development Roadmap
 
 - [x] Project scaffold and version control
@@ -778,7 +842,7 @@ python -m uvicorn src.self_healing_ml.api.main:app --reload
 - [x] Model registry and controlled promotion
 - [x] Model rollback mechanism
 - [x] FastAPI prediction service
-- [ ] Streamlit monitoring dashboard
+- [x] Streamlit monitoring dashboard
 - [ ] CI/CD pipeline and automated tests
 - [ ] Docker-based deployment
 

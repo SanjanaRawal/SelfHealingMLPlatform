@@ -1,0 +1,2 @@
+sample_count,accuracy,precision,recall,f1_score,roc_auc,baseline_f1,current_f1,f1_drop,minimum_f1,maximum_f1_drop,performance_degraded,alerts,model_name,monitoring_mode
+1409,0.7423704755145494,0.5095320623916811,0.786096256684492,0.6182965299684543,0.840858715027513,0.6136,0.6182965299684543,-0.004696529968454266,0.6,0.05,False,[],tuned_logistic_regression,offline_demonstration

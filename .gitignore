@@ -14,6 +14,17 @@ models/*
 reports/*
 logs/*
 
+# Allow deployment model
+!models/tuned_logistic_regression.joblib
+
+# Allow dashboard monitoring reports
+!reports/model_performance_report.csv
+!reports/data_drift_report.csv
+!reports/retraining_decision.json
+!reports/champion_challenger_report.json
+!reports/final_test_results.json
+
+
 # Keep placeholder files if added later
 !.gitkeep
 

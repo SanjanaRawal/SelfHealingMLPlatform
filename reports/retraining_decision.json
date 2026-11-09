@@ -1,0 +1,14 @@
+{
+    "retraining_recommended": true,
+    "drift_detected": true,
+    "performance_degraded": false,
+    "reasons": [
+        "Data drift detected."
+    ],
+    "model_name": "tuned_logistic_regression",
+    "monitoring_mode": "offline_demonstration",
+    "current_f1": 0.6182965299684543,
+    "minimum_f1": 0.6,
+    "f1_drop": -0.0046965299684542,
+    "maximum_f1_drop": 0.05
+}

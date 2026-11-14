@@ -78,6 +78,57 @@ def _upsert_model(registry, model_name, metrics, status):
         "registered_at": _utc_timestamp(),
     })
 
+def initialize_champion_registry(report_path=REPORT_PATH,
+    registry_path=REGISTRY_PATH, model_dir=MODEL_DIR,):
+    """
+    Register the evaluated champion when no registry exists.
+    This function does not promote a rejected challenger.
+    """
+    report = _read_evaluation_report(report_path)
+
+    registry_path = Path(registry_path)
+    model_dir = Path(model_dir)
+
+    if registry_path.exists():
+        registry = load_registry(registry_path)
+        if registry["active_champion"]:
+            return {
+                "initialized": False,
+                "reason": "registry_already_initialized",
+                "active_champion": registry["active_champion"],
+            }
+
+    champion_name = report["champion_model"]
+    champion_path = model_dir / champion_name
+
+    if not champion_path.is_file():
+        raise FileNotFoundError(f"Champion model artifact not found: {champion_path}")
+
+    registry = load_registry(registry_path)
+
+    _upsert_model(registry, champion_name, report["champion_metrics"], "champion")
+
+    registry["active_champion"] = champion_name
+
+    registry["history"].append({
+        "timestamp": _utc_timestamp(),
+        "action": "initialize_champion_registry",
+        "previous_champion": None,
+        "new_champion": champion_name,
+        "decision": report["decision"],
+        "metrics": report["champion_metrics"],
+    })
+
+    save_registry(registry, registry_path)
+
+    result = { "initialized": True,
+        "active_champion": champion_name,
+    }
+
+    print(json.dumps(result, indent=4))
+    print(f"Registry initialized: {registry_path}")
+
+    return result
 
 def promote_challenger(report_path=REPORT_PATH,
     registry_path=REGISTRY_PATH, model_dir=MODEL_DIR):
@@ -96,6 +147,7 @@ def promote_challenger(report_path=REPORT_PATH,
         }
 
     model_dir = Path(model_dir)
+    registry_path = Path(registry_path)
     champion_name = report["champion_model"]
     challenger_name = report["challenger_model"]
 
@@ -150,4 +202,4 @@ def promote_challenger(report_path=REPORT_PATH,
 
 
 if __name__ == "__main__":
-    promote_challenger()
+    initialize_champion_registry()
